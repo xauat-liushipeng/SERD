@@ -1,0 +1,8 @@
+numpy>=1.26,<2
+opencv-python>=4.8
+Pillow>=10
+
+# Install PyTorch for your CUDA version and install the official SAM3 package:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+#   pip install -e third_party/sam3
+
