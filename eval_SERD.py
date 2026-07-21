@@ -50,17 +50,16 @@ def edge_prior(gray: np.ndarray, mode: str) -> np.ndarray:
     raise ValueError(f"unknown edge mode: {mode}")
 
 
-def serd_decode(semantic: np.ndarray, edge: np.ndarray, tau: float, alpha: float) -> np.ndarray:
+def serd_decode(semantic: np.ndarray, edge: np.ndarray, tau: float) -> np.ndarray:
     response = normalize01(semantic)
-    calibrated = normalize01(response * (1.0 + float(alpha) * normalize01(edge)))
+    calibrated = normalize01(response * (1.0 + normalize01(edge)))
     return calibrated >= float(tau)
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate SERD on all crack datasets.")
     add_shared_arguments(parser, "outputs/eval_SERD")
-    parser.add_argument("--tau", type=float, default=0.40, help="SERD decision threshold.")
-    parser.add_argument("--alpha", type=float, default=1.0, help="Edge calibration strength.")
+    parser.add_argument("--tau", type=float, default=0.45, help="SERD decision threshold.")
     parser.add_argument("--edge_mode", default="sobel", choices=["sobel", "canny", "log", "tophat"])
     return parser.parse_args()
 
@@ -87,7 +86,7 @@ def evaluate_dataset(
             gt = gt_gray > 0 if job["gt_positive"] == "nonzero" else gt_gray == 0
             semantic = runner.predict_semantic(image_rgb, args.text_prompt)
             gray = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2GRAY)
-            pred = serd_decode(semantic, edge_prior(gray, args.edge_mode), args.tau, args.alpha)
+            pred = serd_decode(semantic, edge_prior(gray, args.edge_mode), args.tau)
             row = {
                 "dataset": job["name"],
                 "method": METHOD,
@@ -95,7 +94,6 @@ def evaluate_dataset(
                 "mask": str(gt_path),
                 **binary_metrics(pred, gt),
                 "tau": float(args.tau),
-                "alpha": float(args.alpha),
                 "edge_mode": args.edge_mode,
                 **trace,
             }
@@ -126,7 +124,6 @@ def evaluate_dataset(
             "failures": len(failures),
             "gt_positive": job["gt_positive"],
             "tau": float(args.tau),
-            "alpha": float(args.alpha),
             "edge_mode": args.edge_mode,
         }
     )
@@ -172,7 +169,6 @@ def main() -> None:
             "total_images": sum(item["total_images"] for item in summaries),
             "failures": len(all_failures),
             "tau": float(args.tau),
-            "alpha": float(args.alpha),
             "edge_mode": args.edge_mode,
         }
     )
@@ -185,4 +181,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

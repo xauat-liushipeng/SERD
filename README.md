@@ -51,7 +51,7 @@ python eval_SERD.py --datasets all --data_root /path/to/datasets --preflight
 
 ## Evaluation
 
-Evaluate SERD on every dataset with the paper defaults (`tau=0.40`, `alpha=1.0`, Sobel edge prior):
+Evaluate SERD on every dataset with the paper defaults (`tau=0.45`, Sobel edge prior):
 
 ```bash
 python eval_SERD.py --datasets all --data_root /path/to/datasets \
